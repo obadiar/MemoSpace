@@ -13,9 +13,13 @@
 		D43B50721F6DCC3D00116DAE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D43B50701F6DCC3D00116DAE /* Main.storyboard */; };
 		D43B50741F6DCC3D00116DAE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D43B50731F6DCC3D00116DAE /* Assets.xcassets */; };
 		D43B50771F6DCC3D00116DAE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D43B50751F6DCC3D00116DAE /* LaunchScreen.storyboard */; };
+		F24EB359A7E29D214B8DC143 /* Pods_MemoSpace.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 039FF246AD466BD31DCBFC04 /* Pods_MemoSpace.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		039FF246AD466BD31DCBFC04 /* Pods_MemoSpace.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MemoSpace.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E9CE80514D2AE53DF07439A /* Pods-MemoSpace.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemoSpace.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace.debug.xcconfig"; sourceTree = "<group>"; };
+		447F37D2AA7261671D816C7A /* Pods-MemoSpace.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemoSpace.release.xcconfig"; path = "Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace.release.xcconfig"; sourceTree = "<group>"; };
 		D43B50671F6DCC3D00116DAE /* MemoSpace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemoSpace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D43B506A1F6DCC3D00116DAE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D43B506C1F6DCC3D00116DAE /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -31,17 +35,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F24EB359A7E29D214B8DC143 /* Pods_MemoSpace.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6C85AF4BA9EDA3D1423B910B /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2E9CE80514D2AE53DF07439A /* Pods-MemoSpace.debug.xcconfig */,
+				447F37D2AA7261671D816C7A /* Pods-MemoSpace.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		D43B505E1F6DCC3C00116DAE = {
 			isa = PBXGroup;
 			children = (
 				D43B50691F6DCC3D00116DAE /* MemoSpace */,
 				D43B50681F6DCC3D00116DAE /* Products */,
+				6C85AF4BA9EDA3D1423B910B /* Pods */,
+				D6C6D4AEBCD6280B502A3164 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +83,14 @@
 			path = MemoSpace;
 			sourceTree = "<group>";
 		};
+		D6C6D4AEBCD6280B502A3164 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				039FF246AD466BD31DCBFC04 /* Pods_MemoSpace.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -74,9 +98,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D43B507B1F6DCC3D00116DAE /* Build configuration list for PBXNativeTarget "MemoSpace" */;
 			buildPhases = (
+				FF3F77AD712F05875D70F879 /* [CP] Check Pods Manifest.lock */,
 				D43B50631F6DCC3D00116DAE /* Sources */,
 				D43B50641F6DCC3D00116DAE /* Frameworks */,
 				D43B50651F6DCC3D00116DAE /* Resources */,
+				8A19CD3A63CA27C820D7E689 /* [CP] Embed Pods Frameworks */,
+				979E7476A1CABCE2C88D3373 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -134,6 +161,62 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8A19CD3A63CA27C820D7E689 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		979E7476A1CABCE2C88D3373 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FF3F77AD712F05875D70F879 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MemoSpace-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D43B50631F6DCC3D00116DAE /* Sources */ = {
@@ -276,6 +359,7 @@
 		};
 		D43B507C1F6DCC3D00116DAE /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2E9CE80514D2AE53DF07439A /* Pods-MemoSpace.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -291,6 +375,7 @@
 		};
 		D43B507D1F6DCC3D00116DAE /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 447F37D2AA7261671D816C7A /* Pods-MemoSpace.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
