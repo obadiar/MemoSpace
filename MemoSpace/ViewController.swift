@@ -19,34 +19,6 @@ struct MemoImage {
     let z: Float
 }
 
-extension UIImage {
-    func image(withRotation radians: CGFloat) -> UIImage {
-        let cgImage = self.cgImage!
-        let LARGEST_SIZE = CGFloat(max(self.size.width, self.size.height))
-        let context = CGContext.init(data: nil, width:Int(LARGEST_SIZE), height:Int(LARGEST_SIZE), bitsPerComponent: cgImage.bitsPerComponent, bytesPerRow: 0, space: cgImage.colorSpace!, bitmapInfo: cgImage.bitmapInfo.rawValue)!
-        
-        var drawRect = CGRect.zero
-        drawRect.size = self.size
-        let drawOrigin = CGPoint(x: (LARGEST_SIZE - self.size.width) * 0.5,y: (LARGEST_SIZE - self.size.height) * 0.5)
-        drawRect.origin = drawOrigin
-        var tf = CGAffineTransform.identity
-        tf = tf.translatedBy(x: LARGEST_SIZE * 0.5, y: LARGEST_SIZE * 0.5)
-        tf = tf.rotated(by: CGFloat(radians))
-        tf = tf.translatedBy(x: LARGEST_SIZE * -0.5, y: LARGEST_SIZE * -0.5)
-        context.concatenate(tf)
-        context.draw(cgImage, in: drawRect)
-        var rotatedImage = context.makeImage()!
-        
-        drawRect = drawRect.applying(tf)
-        
-        rotatedImage = rotatedImage.cropping(to: drawRect)!
-        let resultImage = UIImage(cgImage: rotatedImage)
-        return resultImage
-        
-        
-    }
-}
-
 class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDelegate {
     
     let locationManager = CLLocationManager()
@@ -55,7 +27,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         let location = locations[0]
         let myLocation:CLLocationCoordinate2D = CLLocationCoordinate2DMake(location.coordinate.latitude, location.coordinate.longitude)
     }
-    
     
     @IBOutlet var sceneView: ARSCNView!
     
@@ -80,27 +51,52 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        
         //Add tap gesture and connect it to a function
         let tapGesture = UITapGestureRecognizer(target: self, action:
             #selector(ViewController.handleTap(gestureRecognize:)))
         view.addGestureRecognizer(tapGesture)
     }
     
-    //The function for the tap
+    //Tap handler
     @objc
     func handleTap(gestureRecognize: UITapGestureRecognizer){
+        var text=""
+        switch UIDevice.current.orientation{
+        case .portrait:
+            text="Portrait"
+        case .portraitUpsideDown:
+            text="PortraitUpsideDown"
+        case .landscapeLeft:
+            text="LandscapeLeft"
+        case .landscapeRight:
+            text="LandscapeRight"
+        default:
+            text="Another"
+        }
+        print("Device orientation is", text, locationManager.location?.coordinate)
+        
         //Captures the snapshot
         var imageSnapped = sceneView.snapshot()
         
+        //Rotating the image before adding it, based on the current device orientation
+        if (UIDevice.current.orientation.isPortrait){
+            imageSnapped = imageSnapped.image(withRotation: CGFloat((Double.pi / 2)))
+        } else if (UIDevice.current.orientation == UIDeviceOrientation.portraitUpsideDown){
+            imageSnapped = imageSnapped.image(withRotation: CGFloat(-(Double.pi)))
+        } else if (UIDevice.current.orientation == UIDeviceOrientation.landscapeRight){
+            imageSnapped = imageSnapped.image(withRotation: CGFloat((Double.pi)))
+        }
+        
         //Create a new MemoImage
-        var newMemoImage = MemoImage(image: imageSnapped, x: 0, y: 0, z: -0.2)
+        let newMemoImage = MemoImage(image: imageSnapped, x: 0, y: 0, z: -0.2)
         
         addImage(memoImage: newMemoImage)
     }
     
-    //The function to add the image
+    //Adds a memoSpace image to the scene
     func addImage(memoImage: MemoImage){
+        
+//        print("In", UIDevice.current.orientation, "mode, the height is", memoImage.image.size.height, "and the width is", memoImage.image.size.width)
         
         //Getting the current fram
         guard let currentFrame = sceneView.session.currentFrame else {
@@ -108,13 +104,19 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         }
         
         //Setting up the image plane
-        var imagePlane = SCNPlane(width: sceneView.bounds.width / 6000,
-                                  height: sceneView.bounds.height / 6000)
+        var imagePlane: SCNPlane
+        //Scaling..
+        if (UIDevice.current.orientation == UIDeviceOrientation.portrait){  //If up straight portrait
+            imagePlane = SCNPlane(width: sceneView.bounds.width / 2000,
+                                      height: sceneView.bounds.height / 6000)
+        } else if (UIDevice.current.orientation.isLandscape){   //If landscape (either left or right)
+            imagePlane = SCNPlane(width: sceneView.bounds.width / 6000,
+                                      height: sceneView.bounds.height / 6000)
+        }
+        else {  //Otherwise, Users cannot take images with their devices upside down
+            return
+        }
         
-        
-        
-        
-        //var imageSnapped = UIImage(named:imageName)!
         
         //Adding the image to the imagePlane
         imagePlane.firstMaterial?.diffuse.contents = memoImage.image
@@ -182,5 +184,32 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
+    }
+}
+
+//An extension to rotate the snapshot in case of portrait orientation
+extension UIImage {
+    func image(withRotation radians: CGFloat) -> UIImage {
+        let cgImage = self.cgImage!
+        let LARGEST_SIZE = CGFloat(max(self.size.width, self.size.height))
+        let context = CGContext.init(data: nil, width:Int(LARGEST_SIZE), height:Int(LARGEST_SIZE), bitsPerComponent: cgImage.bitsPerComponent, bytesPerRow: 0, space: cgImage.colorSpace!, bitmapInfo: cgImage.bitmapInfo.rawValue)!
+        
+        var drawRect = CGRect.zero
+        drawRect.size = self.size
+        let drawOrigin = CGPoint(x: (LARGEST_SIZE - self.size.width) * 0.5,y: (LARGEST_SIZE - self.size.height) * 0.5)
+        drawRect.origin = drawOrigin
+        var tf = CGAffineTransform.identity
+        tf = tf.translatedBy(x: LARGEST_SIZE * 0.5, y: LARGEST_SIZE * 0.5)
+        tf = tf.rotated(by: CGFloat(radians))
+        tf = tf.translatedBy(x: LARGEST_SIZE * -0.5, y: LARGEST_SIZE * -0.5)
+        context.concatenate(tf)
+        context.draw(cgImage, in: drawRect)
+        var rotatedImage = context.makeImage()!
+        
+        drawRect = drawRect.applying(tf)
+        
+        rotatedImage = rotatedImage.cropping(to: drawRect)!
+        let resultImage = UIImage(cgImage: rotatedImage)
+        return resultImage
     }
 }
