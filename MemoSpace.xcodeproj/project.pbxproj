@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		D43B506B1F6DCC3D00116DAE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43B506A1F6DCC3D00116DAE /* AppDelegate.swift */; };
-		D43B506D1F6DCC3D00116DAE /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = D43B506C1F6DCC3D00116DAE /* art.scnassets */; };
 		D43B506F1F6DCC3D00116DAE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43B506E1F6DCC3D00116DAE /* ViewController.swift */; };
 		D43B50721F6DCC3D00116DAE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D43B50701F6DCC3D00116DAE /* Main.storyboard */; };
 		D43B50741F6DCC3D00116DAE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D43B50731F6DCC3D00116DAE /* Assets.xcassets */; };
@@ -18,7 +17,6 @@
 /* Begin PBXFileReference section */
 		D43B50671F6DCC3D00116DAE /* MemoSpace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemoSpace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D43B506A1F6DCC3D00116DAE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D43B506C1F6DCC3D00116DAE /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		D43B506E1F6DCC3D00116DAE /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		D43B50711F6DCC3D00116DAE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D43B50731F6DCC3D00116DAE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -57,7 +55,6 @@
 			isa = PBXGroup;
 			children = (
 				D43B506A1F6DCC3D00116DAE /* AppDelegate.swift */,
-				D43B506C1F6DCC3D00116DAE /* art.scnassets */,
 				D43B506E1F6DCC3D00116DAE /* ViewController.swift */,
 				D43B50701F6DCC3D00116DAE /* Main.storyboard */,
 				D43B50731F6DCC3D00116DAE /* Assets.xcassets */,
@@ -126,7 +123,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D43B506D1F6DCC3D00116DAE /* art.scnassets in Resources */,
 				D43B50771F6DCC3D00116DAE /* LaunchScreen.storyboard in Resources */,
 				D43B50741F6DCC3D00116DAE /* Assets.xcassets in Resources */,
 				D43B50721F6DCC3D00116DAE /* Main.storyboard in Resources */,
@@ -282,7 +278,7 @@
 				DEVELOPMENT_TEAM = J5QMF2757M;
 				INFOPLIST_FILE = MemoSpace/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = memo123.MemoSpace;
+				PRODUCT_BUNDLE_IDENTIFIER = testytester.fghdfghfgfgfg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -297,7 +293,7 @@
 				DEVELOPMENT_TEAM = J5QMF2757M;
 				INFOPLIST_FILE = MemoSpace/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = memo123.MemoSpace;
+				PRODUCT_BUNDLE_IDENTIFIER = testytester.fghdfghfgfgfg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
