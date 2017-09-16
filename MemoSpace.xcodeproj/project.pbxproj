@@ -13,6 +13,7 @@
 		D43B50721F6DCC3D00116DAE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D43B50701F6DCC3D00116DAE /* Main.storyboard */; };
 		D43B50741F6DCC3D00116DAE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D43B50731F6DCC3D00116DAE /* Assets.xcassets */; };
 		D43B50771F6DCC3D00116DAE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D43B50751F6DCC3D00116DAE /* LaunchScreen.storyboard */; };
+		D43B507F1F6DE80700116DAE /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D43B507E1F6DE80700116DAE /* CoreLocation.framework */; };
 		F24EB359A7E29D214B8DC143 /* Pods_MemoSpace.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 039FF246AD466BD31DCBFC04 /* Pods_MemoSpace.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 		D43B50731F6DCC3D00116DAE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D43B50761F6DCC3D00116DAE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D43B50781F6DCC3D00116DAE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D43B507E1F6DE80700116DAE /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D43B507F1F6DE80700116DAE /* CoreLocation.framework in Frameworks */,
 				F24EB359A7E29D214B8DC143 /* Pods_MemoSpace.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,6 +89,7 @@
 		D6C6D4AEBCD6280B502A3164 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D43B507E1F6DE80700116DAE /* CoreLocation.framework */,
 				039FF246AD466BD31DCBFC04 /* Pods_MemoSpace.framework */,
 			);
 			name = Frameworks;

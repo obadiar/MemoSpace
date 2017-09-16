@@ -10,7 +10,7 @@ import UIKit
 import SceneKit
 import ARKit
 import Alamofire
-
+import CoreLocation
 
 struct MemoImage {
     let image: UIImage
@@ -47,13 +47,31 @@ extension UIImage {
     }
 }
 
-class ViewController: UIViewController, ARSCNViewDelegate {
+class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDelegate {
     
-
+    let locationManager = CLLocationManager()
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let location = locations[0]
+        let myLocation:CLLocationCoordinate2D = CLLocationCoordinate2DMake(location.coordinate.latitude, location.coordinate.longitude)
+    }
+    
+    
     @IBOutlet var sceneView: ARSCNView!
     
     override func viewDidLoad() {
+        
+        
+        
         super.viewDidLoad()
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+        
+        
+        //print(locationManager.location?.coordinate.latitude)
         
         
         // Set the view's delegate
