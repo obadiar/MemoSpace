@@ -282,7 +282,7 @@
 				DEVELOPMENT_TEAM = J5QMF2757M;
 				INFOPLIST_FILE = MemoSpace/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = memo123.MemoSpace;
+				PRODUCT_BUNDLE_IDENTIFIER = testytester.fghdfghfgfgfg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -297,7 +297,7 @@
 				DEVELOPMENT_TEAM = J5QMF2757M;
 				INFOPLIST_FILE = MemoSpace/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = memo123.MemoSpace;
+				PRODUCT_BUNDLE_IDENTIFIER = testytester.fghdfghfgfgfg;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
