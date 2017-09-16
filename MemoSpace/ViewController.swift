@@ -10,11 +10,7 @@ import UIKit
 import SceneKit
 import ARKit
 
-//Hello ROB Hello
 
-//Last try
-
-//I'm really cool
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
