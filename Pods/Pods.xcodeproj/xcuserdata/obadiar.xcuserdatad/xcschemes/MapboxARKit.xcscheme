@@ -14,10 +14,10 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '2E137D34D65FE2BEEE5E0EAAD7C70E46'
-               BlueprintName = 'SwiftyJSON'
+               BlueprintIdentifier = '86C4E3380899312683A557810536F476'
+               BlueprintName = 'MapboxARKit'
                ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'SwiftyJSON.framework'>
+               BuildableName = 'MapboxARKit.framework'>
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

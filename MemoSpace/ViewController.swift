@@ -13,6 +13,7 @@ import Alamofire
 import CoreLocation
 import FirebaseStorage
 import Foundation
+import MapboxARKit
 
 struct MemoImage {
     let image: UIImage
@@ -25,8 +26,6 @@ let storage = Storage.storage()
 let storageRef = storage.reference()
 
 class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDelegate {
-    
-    
     let locationManager = CLLocationManager()
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -35,62 +34,77 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
     }
     
     @IBOutlet var sceneView: ARSCNView!
+    var annotationManager: AnnotationManager!
     
     override func viewDidLoad() {
         
         super.viewDidLoad()
+    
+        //Setting up the camera button
+        let screenSize: CGRect = UIScreen.main.bounds
+        let screenWidth = screenSize.width
+        let screenHeight = screenSize.height
         
-                func downloadImage(url: URL, xC: Float, yC: Float, zC: Float) {
-                    print("Download Started for", url)
-                    getDataFromUrl(url: url) { (data, response, error)  in
-                        guard let data = data, error == nil else { return }
-                        print(response?.suggestedFilename ?? url.lastPathComponent)
-                        print("Download Finished")
-                        DispatchQueue.main.async() { () -> Void in
-                            let newImage = UIImage(data: data)
-                            let newMemoImage = MemoImage(image: newImage!, x: xC, y: yC, z: zC)
-                            print("X:", xC, "Y:", yC, "Z:", zC)
-                            self.addImage(memoImage: newMemoImage)
-                        }
+        let button = UIButton(type: .custom)
+        button.frame = CGRect(x: (screenWidth/2)-40, y: screenHeight-120, width: 80, height: 80)
+        button.layer.cornerRadius = 0.2 * button.bounds.size.width
+        button.clipsToBounds = true
+        button.setImage(UIImage(named: "circle.png"), for: .normal)
+        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        sceneView.addSubview(button)
+        
+        func loadImage(url: URL, xC: Float, yC: Float, zC: Float) {
+            print("Download Started for", url)
+            getDataFromUrl(url: url) { (data, response, error)  in
+                guard let data = data, error == nil else { return }
+                print(response?.suggestedFilename ?? url.lastPathComponent)
+                print("Download Finished")
+                
+                DispatchQueue.main.async() { () -> Void in
+                    let newImage = UIImage(data: data)
+                    
+                    let newMemoImage = MemoImage(image: newImage!, x: xC, y: yC, z: zC)
+                    print("X:", xC, "Y:", yC, "Z:", zC)
+                    self.addImage(memoImage: newMemoImage)
+                }
+            }
+        }
+
+        Alamofire.request("https://memospace-backend.herokuapp.com/api/get_images").responseJSON { response in
+            print("Request: \(String(describing: response.request))")   // original url request
+            print("Response: \(String(describing: response.response))") // http url response
+            print("Result: \(response.result)")                         // response serialization result
+
+            if let json = response.result.value {
+                print("JSON: \(json)") // serialized json response
+                for element in json as! [Dictionary<String, AnyObject>] { // or [[String:AnyObject]]
+                    if let checkedUrl = URL(string: element["image_url"] as! String) {
+                        let currentLatitude = Double((self.locationManager.location?.coordinate.latitude)!)
+                        let currentLongitude = Double((self.locationManager.location?.coordinate.longitude)!)
+                        let currentAltitude = Double((self.locationManager.location?.altitude)!)
+                        let currentLocation = CLLocation(latitude: currentLatitude, longitude: currentLongitude)
+                        let imageLatitude = element["latitude"]
+                        let imageLongitude = element["longitude"]
+                        let imageAltitude = element["altitude"]
+                        let imageLocation = CLLocation(latitude: imageLatitude as! CLLocationDegrees, longitude: imageLongitude as! CLLocationDegrees)
+                        print("The device coords are: [", currentLatitude, ", ", currentLongitude, "]")
+                        print("The image coords are: [", imageLatitude, ", ", imageLongitude, "]")
+                        print("The distance between the coordinates is", currentLocation.distance(from: imageLocation))
+
+                        let xDiff = currentLongitude-(Double ((imageLongitude as? Double)!))
+                        let yDiff = currentAltitude-(Double ((imageAltitude as? Double)!))
+                        let zDiff = currentLatitude-(Double ((imageLatitude as? Double)!))
+                        
+                        loadImage(url: checkedUrl, xC: Float(yDiff), yC: Float(xDiff), zC: Float(zDiff))
                     }
                 }
-        
-                Alamofire.request("https://memospace-backend.herokuapp.com/api/get_images").responseJSON { response in
-                    print("Request: \(String(describing: response.request))")   // original url request
-                    print("Response: \(String(describing: response.response))") // http url response
-                    print("Result: \(response.result)")                         // response serialization result
-        
-                    if let json = response.result.value {
-                        print("JSON: \(json)") // serialized json response
-                        for element in json as! [Dictionary<String, AnyObject>] { // or [[String:AnyObject]]
-                            if let checkedUrl = URL(string: element["image_url"] as! String) {
-//                                let lat1 = Double((self.locationManager.location?.coordinate.latitude)!)
-//                                let lon1 = Double((self.locationManager.location?.coordinate.longitude)!)
-//
-//                                let lat2 = element["latitude"]
-//                                print("image latitude", lat2)
-//                                let lon2 = element["longitude"]
-//                                print("image longitude", lon2)
-//
-//
-//                                let haverD = haversineDinstance(la1: lat1, lo1: lon1, la2: (lat2 as! Double as! Double), lo2: (lon2 as! Double))
-//                                let haverTheta = angleFromCoordinate(lat1: lat1, long1: lon1, lat2: (lat2 as! Double as! Double), long2: (lon2 as! Double))
-//
-//                                let image_x = 0
-//                                let image_y = haverD * cos(haverTheta)
-//                                let image_z = -haverD * sin(haverTheta)
-                                downloadImage(url: checkedUrl, xC: Float((element["longitude"] as? Float)!), yC: Float(0), zC: Float((element["latitude"] as? Float)!))
-                            }
-                        }
-                    }
-        
-                    if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
-                        print("Data: \(utf8Text)") // original server data as UTF8 string
-                    }
-        
-        
-                }
-        
+            }
+
+            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+                print("Data: \(utf8Text)") // original server data as UTF8 string
+            }
+
+        }
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -106,14 +120,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         sceneView.showsStatistics = true
         
         //Add tap gesture and connect it to a function
-        let tapGesture = UITapGestureRecognizer(target: self, action:
-            #selector(ViewController.handleTap(gestureRecognize:)))
-        view.addGestureRecognizer(tapGesture)
+//        let tapGesture = UITapGestureRecognizer(target: self, action:
+//            #selector(ViewController.objectInteracting(UITapGestureRecognizer, sceneView)))
+//        view.addGestureRecognizer(tapGesture)
     }
     
     //Tap handler
     @objc
-    func handleTap(gestureRecognize: UITapGestureRecognizer){
+    func buttonAction(sender: UIButton!) {
         
         //        print("Device orientation is", getOrientationString(), locationManager.location?.coordinate)
         let fileName = Date().ticks
@@ -199,7 +213,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         else {  //Otherwise, Users cannot take images with their devices upside down
             return
         }
-        
         
         //Adding the image to the imagePlane
         imagePlane.firstMaterial?.diffuse.contents = memoImage.image
@@ -326,60 +339,4 @@ func getDataFromUrl(url: URL, completion: @escaping (_ data: Data?, _  response:
         (data, response, error) in
         completion(data, response, error)
         }.resume()
-}
-//
-//
-//extension UIImageView {
-//    func downloadedFrom(url: URL, contentMode mode: UIViewContentMode = .scaleAspectFit) {
-//        contentMode = mode
-//        URLSession.shared.dataTask(with: url) { (data, response, error) in
-//            guard
-//                let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
-//                let mimeType = response?.mimeType, mimeType.hasPrefix("image"),
-//                let data = data, error == nil,
-//                let image = UIImage(data: data)
-//                else { return }
-//            DispatchQueue.main.async() { () -> Void in
-//                self.image = image
-//            }
-//            }.resume()
-//    }
-//    func downloadedFrom(link: String, contentMode mode: UIViewContentMode = .scaleAspectFit) {
-//        guard let url = URL(string: link) else { return }
-//        downloadedFrom(url: url, contentMode: mode)
-//    }
-//}
-
-func haversineDinstance(la1: Double, lo1: Double, la2: Double, lo2: Double, radius: Double = 6367444.7) -> Double {
-    
-    let haversin = { (angle: Double) -> Double in
-        return (1 - cos(angle))/2
-    }
-    
-    let ahaversin = { (angle: Double) -> Double in
-        return 2*asin(sqrt(angle))
-    }
-    
-    // Converts from degrees to radians
-    let dToR = { (angle: Double) -> Double in
-        return (angle / 360) * 2 * M_PI
-    }
-    
-    let lat1 = dToR(la1)
-    let lon1 = dToR(lo1)
-    let lat2 = dToR(la2)
-    let lon2 = dToR(lo2)
-    
-    return radius * ahaversin(haversin(lat2 - lat1) + cos(lat1) * cos(lat2) * haversin(lon2 - lon1))
-}
-
-func angleFromCoordinate(lat1: Double, long1: Double, lat2: Double, long2: Double) -> (Double){
-    let dLon = (long2 - long1);
-    let y = sin(dLon) * cos(lat2);
-    let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
-    var brng = atan2(y, x);
-    brng = Double((brng + 360).truncatingRemainder(dividingBy: 360));
-    brng = 360 - brng; // count degrees counter-clockwise - remove to make clockwise
-    
-    return brng;
 }
