@@ -11,24 +11,46 @@ import SceneKit
 import ARKit
 import Alamofire
 import CoreLocation
+import Foundation
+import SwiftyJSON
+
+
 
 struct MemoImage {
     let image: UIImage
     let x: Float
     let y: Float
     let z: Float
+    let orientation: String
+    let heading: String
 }
 
+struct RawMemoImage {
+    let image_url: String
+    let lat: Float
+    let lon: Float
+    let orientation: String
+    let altitude: Float
+}
+
+let screenSize: CGRect = UIScreen.main.bounds
+let screenWidth = screenSize.width
+let screenHeight = screenSize.height
+
+var toRemove = SCNNode()
+var zoomedIn = false
+
 class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDelegate {
-    
+    var curAlt = 10.0;
     let locationManager = CLLocationManager()
+    var curLoc = [[Double(),Double()]]
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let location = locations[0]
         let myLocation:CLLocationCoordinate2D = CLLocationCoordinate2DMake(location.coordinate.latitude, location.coordinate.longitude)
     }
     
-    @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet var sceneView: ARSCNView!    
     
     override func viewDidLoad() {
         
@@ -37,29 +59,32 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         super.viewDidLoad()
         
         locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
-        
-        
-        //print(locationManager.location?.coordinate.latitude)
-        
-        
+        locationManager.distanceFilter = 0.1
+ 
         // Set the view's delegate
         sceneView.delegate = self
-        
+
         // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
+        sceneView.showsStatistics = false
         
-        //Add tap gesture and connect it to a function
-        let tapGesture = UITapGestureRecognizer(target: self, action:
-            #selector(ViewController.handleTap(gestureRecognize:)))
-        view.addGestureRecognizer(tapGesture)
+        let button = UIButton(frame: CGRect(x: (screenWidth/2)-50, y: screenHeight-50, width: 100, height: 50))
+        button.backgroundColor = .green
+        button.setTitle("Take Picture", for: .normal)
+        button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
+        
+        sceneView.addSubview(button)
+        
+        callImages()
+        
+        
     }
+
+
     
-    //Tap handler
-    @objc
-    func handleTap(gestureRecognize: UITapGestureRecognizer){
+    @objc func buttonAction(sender: UIButton!) {
         var text=""
         switch UIDevice.current.orientation{
         case .portrait:
@@ -73,8 +98,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         default:
             text="Another"
         }
-        print("Device orientation is", text, locationManager.location?.coordinate)
-        
+        //print("Device orientation is", text, locationManager.location?.coordinate)
+        //callImages()
         //Captures the snapshot
         var imageSnapped = sceneView.snapshot()
         
@@ -88,15 +113,59 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         }
         
         //Create a new MemoImage
-        let newMemoImage = MemoImage(image: imageSnapped, x: 0, y: 0, z: -0.2)
+        let newMemoImage = MemoImage(image: imageSnapped, x: 0, y: 0, z: -0.2, orientation: "none", heading: "none")
         
         addImage(memoImage: newMemoImage)
+        
+      
     }
+    
+    
+    //Tap handler
+    @objc
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let location = touch.location(in: sceneView)
+            
+            let hitlist = sceneView.hitTest(location, options: nil)
+            
+            if let hitObject = hitlist.first {
+                let node = hitObject.node
+                
+                if (zoomedIn){
+                    toRemove.removeFromParentNode()
+                    zoomedIn = false
+                }
+                
+                else{
+                    zoomedIn = true
+                    let planeNode = SCNNode(geometry: node.geometry)
+                    toRemove = planeNode
+                    sceneView.scene.rootNode.addChildNode(planeNode)
+                    
+                    guard let currentFrame = sceneView.session.currentFrame else {
+                        return
+                    }
+                    
+                    
+                    //Transform the image
+                    var translation = matrix_identity_float4x4
+                    translation.columns.3.z = -0.15
+                    translation.columns.3.x = 0
+                    translation.columns.3.y = 0
+                    planeNode.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
+                }
+                
+                
+            }
+        }
+        
+    }
+    
     
     //Adds a memoSpace image to the scene
     func addImage(memoImage: MemoImage){
         
-//        print("In", UIDevice.current.orientation, "mode, the height is", memoImage.image.size.height, "and the width is", memoImage.image.size.width)
         
         //Getting the current fram
         guard let currentFrame = sceneView.session.currentFrame else {
@@ -116,17 +185,22 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         else {  //Otherwise, Users cannot take images with their devices upside down
             return
         }
+
         
         
         //Adding the image to the imagePlane
         imagePlane.firstMaterial?.diffuse.contents = memoImage.image
         imagePlane.firstMaterial?.lightingModel = .constant
         
+    
         
         
         // Create plane node and add it it the scene
         let planeNode = SCNNode(geometry: imagePlane)
         sceneView.scene.rootNode.addChildNode(planeNode)
+        
+       
+        
         
         //Transform the image
         var translation = matrix_identity_float4x4
@@ -134,14 +208,93 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         translation.columns.3.x = memoImage.x
         translation.columns.3.y = memoImage.y
         planeNode.simdTransform = matrix_multiply(currentFrame.camera.transform, translation)
+        
+     
     }
+    
+    //Function to call the images
+    func callImages(){
+        var lat1 = Double((locationManager.location?.coordinate.latitude)!)
+        var lon1 = Double((locationManager.location?.coordinate.longitude)!)
+        
+        Alamofire.request("https://memospace-backend.herokuapp.com/api/get_images").responseJSON { response in
+            print("Request: \(String(describing: response.request))")   // original url request
+            print("Response: \(String(describing: response.response))") // http url response
+            print("Result: \(response.result)")                         // response serialization result
+            
+            if let json = response.result.value {
+                var rawMemDataArry = [RawMemoImage]()
+  // serialized json response
+                for memData in json as! [Dictionary<String, AnyObject>] { // or [[String:AnyObject]]```
+                    var image_url = memData["image_url"] as! String!
+                    var lat = memData["latitude"] as! Float!
+                    var lon = memData["longitude"] as! Float!
+                    var orientation = memData["orientation"] as! String!
+                    var altitude = memData["altitude"] as! Float!
+                    print(altitude)
+                    var newRawMem = RawMemoImage(image_url: image_url!, lat: lat!, lon: lon!, orientation: orientation!, altitude: altitude!)
+                    rawMemDataArry.append(newRawMem)
+                }
+                
+                var y_count = -2;
+                var x_count = 0;
+                
+                for image in rawMemDataArry {
+                    if (y_count == 3) {
+                        y_count = -2
+                        x_count -= 1
+                    }
+                    
+                    
+                    self.placeImage(memData: image, lat1: lat1, lon1: lon1, x_count: Float(x_count), y_count: Float(y_count))
+                    
+                    y_count += 1
+                }
+                
+                
+  
+            }
+        }
+    }
+    
+    func placeImage(memData: RawMemoImage, lat1: Double, lon1: Double, x_count: Float, y_count: Float){
+
+        let coords = CLLocation(latitude: CLLocationDegrees(memData.lat), longitude: CLLocationDegrees(memData.lon))
+        let coords_cur = CLLocation(latitude: CLLocationDegrees(lat1), longitude: CLLocationDegrees(lon1))
+        
+        
+        print(CLLocation.distance(coords_cur))
+        
+        // The image to dowload
+       
+        var url:String? = memData.image_url
+        let remoteImageURL = URL(string: url!)
+        
+       
+
+         // Use Alamofire to download the image
+        Alamofire.request(remoteImageURL!).responseData { (response) in
+                 if response.error == nil {
+                         print(response.result)
+        
+                         // Show the downloaded image:
+                         if let data = response.data {
+                                 var image = UIImage(data: data)
+                            let imageDownloadedObj = MemoImage(image: image!, x: Float(x_count), y: Float(y_count), z: -0.5, orientation: memData.orientation, heading: "null")
+                            self.addImage(memoImage: imageDownloadedObj)
+                             }
+                    
+                     }
+             }
+    }
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        configuration.worldAlignment = .gravity
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -185,6 +338,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
     }
+
 }
 
 //An extension to rotate the snapshot in case of portrait orientation
