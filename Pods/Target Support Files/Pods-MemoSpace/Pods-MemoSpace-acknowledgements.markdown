@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
+<<<<<<< HEAD
 ## Firebase
 
 Copyright 2017 Google
@@ -474,6 +475,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
 
+=======
+>>>>>>> origin/rob
 ## SwiftGifOrigin
 
 The MIT License (MIT)
