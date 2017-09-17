@@ -70,11 +70,12 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = false
         
-        let button = UIButton(frame: CGRect(x: (screenWidth/2)-50, y: screenHeight-50, width: 100, height: 50))
-        button.backgroundColor = .green
-        button.setTitle("Take Picture", for: .normal)
+        let button = UIButton(type: .custom)
+        button.frame = CGRect(x: (screenWidth/2)-40, y: screenHeight-120, width: 80, height: 80)
+        button.layer.cornerRadius = 0.2 * button.bounds.size.width
+        button.clipsToBounds = true
+        button.setImage(UIImage(named: "circle.png"), for: .normal)
         button.addTarget(self, action: #selector(buttonAction), for: .touchUpInside)
-        
         sceneView.addSubview(button)
         
         callImages()
@@ -236,19 +237,19 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
                     rawMemDataArry.append(newRawMem)
                 }
                 
-                var y_count = -2;
-                var x_count = 0;
+                var y_count = -0.4;
+                var x_count = 0.4 ;
                 
                 for image in rawMemDataArry {
-                    if (y_count == 3) {
-                        y_count = -2
-                        x_count -= 1
+                    if (y_count > 0.5) {
+                        y_count = -0.4
+                        x_count -= 0.2
                     }
                     
                     
                     self.placeImage(memData: image, lat1: lat1, lon1: lon1, x_count: Float(x_count), y_count: Float(y_count))
                     
-                    y_count += 1
+                    y_count += 0.2
                 }
                 
                 
