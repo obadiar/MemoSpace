@@ -11,6 +11,8 @@ import SceneKit
 import ARKit
 import Alamofire
 import CoreLocation
+import FirebaseStorage
+import Foundation
 
 struct MemoImage {
     let image: UIImage
@@ -19,7 +21,11 @@ struct MemoImage {
     let z: Float
 }
 
+let storage = Storage.storage()
+let storageRef = storage.reference()
+
 class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDelegate {
+    
     
     let locationManager = CLLocationManager()
     
@@ -32,17 +38,65 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
     
     override func viewDidLoad() {
         
-        
-        
         super.viewDidLoad()
+        
+                func downloadImage(url: URL, xC: Float, yC: Float, zC: Float) {
+                    print("Download Started for", url)
+                    getDataFromUrl(url: url) { (data, response, error)  in
+                        guard let data = data, error == nil else { return }
+                        print(response?.suggestedFilename ?? url.lastPathComponent)
+                        print("Download Finished")
+                        DispatchQueue.main.async() { () -> Void in
+                            let newImage = UIImage(data: data)
+                            let newMemoImage = MemoImage(image: newImage!, x: xC, y: yC, z: zC)
+                            print("X:", xC, "Y:", yC, "Z:", zC)
+                            self.addImage(memoImage: newMemoImage)
+                        }
+                    }
+                }
+        
+                Alamofire.request("https://memospace-backend.herokuapp.com/api/get_images").responseJSON { response in
+                    print("Request: \(String(describing: response.request))")   // original url request
+                    print("Response: \(String(describing: response.response))") // http url response
+                    print("Result: \(response.result)")                         // response serialization result
+        
+                    if let json = response.result.value {
+                        print("JSON: \(json)") // serialized json response
+                        for element in json as! [Dictionary<String, AnyObject>] { // or [[String:AnyObject]]
+                            if let checkedUrl = URL(string: element["image_url"] as! String) {
+//                                let lat1 = Double((self.locationManager.location?.coordinate.latitude)!)
+//                                let lon1 = Double((self.locationManager.location?.coordinate.longitude)!)
+//
+//                                let lat2 = element["latitude"]
+//                                print("image latitude", lat2)
+//                                let lon2 = element["longitude"]
+//                                print("image longitude", lon2)
+//
+//
+//                                let haverD = haversineDinstance(la1: lat1, lo1: lon1, la2: (lat2 as! Double as! Double), lo2: (lon2 as! Double))
+//                                let haverTheta = angleFromCoordinate(lat1: lat1, long1: lon1, lat2: (lat2 as! Double as! Double), long2: (lon2 as! Double))
+//
+//                                let image_x = 0
+//                                let image_y = haverD * cos(haverTheta)
+//                                let image_z = -haverD * sin(haverTheta)
+                                downloadImage(url: checkedUrl, xC: Float((element["longitude"] as? Float)!), yC: Float(0), zC: Float((element["latitude"] as? Float)!))
+                            }
+                        }
+                    }
+        
+                    if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+                        print("Data: \(utf8Text)") // original server data as UTF8 string
+                    }
+        
+        
+                }
+        
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         
-        
-        //print(locationManager.location?.coordinate.latitude)
         
         
         // Set the view's delegate
@@ -60,20 +114,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
     //Tap handler
     @objc
     func handleTap(gestureRecognize: UITapGestureRecognizer){
-        var text=""
-        switch UIDevice.current.orientation{
-        case .portrait:
-            text="Portrait"
-        case .portraitUpsideDown:
-            text="PortraitUpsideDown"
-        case .landscapeLeft:
-            text="LandscapeLeft"
-        case .landscapeRight:
-            text="LandscapeRight"
-        default:
-            text="Another"
-        }
-        print("Device orientation is", text, locationManager.location?.coordinate)
+        
+        //        print("Device orientation is", getOrientationString(), locationManager.location?.coordinate)
+        let fileName = Date().ticks
         
         //Captures the snapshot
         var imageSnapped = sceneView.snapshot()
@@ -90,28 +133,68 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         //Create a new MemoImage
         let newMemoImage = MemoImage(image: imageSnapped, x: 0, y: 0, z: -0.2)
         
+        let data = UIImageJPEGRepresentation(imageSnapped, 0.8)
+        
+        // Create a reference to the file you want to upload
+        let testRef = storageRef.child("images/\(fileName).jpg")
+        
+        // Upload the file to the path "images/rivers.jpg"
+        let uploadTask = testRef.putData(data!, metadata: nil) { (metadata, error) in
+            guard let metadata = metadata else {
+                print("Upload failed..")
+                return
+            }
+            print("Uploaded successfully!")
+            // Metadata contains file metadata such as size, content-type, and download URL.
+            let downloadURL = metadata.downloadURL
+            
+            //            print("The download URL", downloadURL()?.absoluteString)
+            Alamofire.upload(
+                multipartFormData: { multipartFormData in
+                    if let imageData = UIImageJPEGRepresentation(imageSnapped, 0.8) {
+                        multipartFormData.append((downloadURL()?.absoluteString.data(using: .utf8))!, withName: "image_url")
+                        multipartFormData.append(getOrientationString().data(using: .utf8)!, withName: "orientation")
+                        multipartFormData.append(String(format: "%f", (self.locationManager.location?.coordinate.longitude)!).data(using: .utf8)!, withName: "Longitude")
+                        multipartFormData.append(String(format: "%f", (self.locationManager.location?.coordinate.latitude)!).data(using: .utf8)!, withName: "Latitude")
+                        multipartFormData.append(String(format: "%f", (self.locationManager.location?.altitude)!).data(using: .utf8)!, withName: "Altitude")
+                        
+                    }
+            },
+                to: "https://memospace-backend.herokuapp.com/api/upload_image",
+                method: .post,
+                headers: ["Content-Type": "image/jpeg"],
+                encodingCompletion: { encodingResult in
+                    switch encodingResult {
+                    case .success(let upload, _, _):
+                        upload.responseJSON { response in
+                            debugPrint(response)
+                        }
+                    case .failure(let encodingError):
+                        print(encodingError)
+                    }
+            })
+        }
         addImage(memoImage: newMemoImage)
     }
     
     //Adds a memoSpace image to the scene
     func addImage(memoImage: MemoImage){
-        
-//        print("In", UIDevice.current.orientation, "mode, the height is", memoImage.image.size.height, "and the width is", memoImage.image.size.width)
+        print("Add memoImage called!")
+        //        print("In", UIDevice.current.orientation, "mode, the height is", memoImage.image.size.height, "and the width is", memoImage.image.size.width)
         
         //Getting the current fram
         guard let currentFrame = sceneView.session.currentFrame else {
             return
         }
-        
         //Setting up the image plane
-        var imagePlane: SCNPlane
+        var imagePlane:SCNPlane
         //Scaling..
         if (UIDevice.current.orientation == UIDeviceOrientation.portrait){  //If up straight portrait
             imagePlane = SCNPlane(width: sceneView.bounds.width / 2000,
-                                      height: sceneView.bounds.height / 6000)
+                                  height: sceneView.bounds.height / 6000)
         } else if (UIDevice.current.orientation.isLandscape){   //If landscape (either left or right)
             imagePlane = SCNPlane(width: sceneView.bounds.width / 6000,
-                                      height: sceneView.bounds.height / 6000)
+                                  height: sceneView.bounds.height / 6000)
         }
         else {  //Otherwise, Users cannot take images with their devices upside down
             return
@@ -121,7 +204,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         //Adding the image to the imagePlane
         imagePlane.firstMaterial?.diffuse.contents = memoImage.image
         imagePlane.firstMaterial?.lightingModel = .constant
-        
         
         
         // Create plane node and add it it the scene
@@ -141,7 +223,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        configuration.worldAlignment = .gravity
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -159,17 +242,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         super.didReceiveMemoryWarning()
         // Release any cached data, images, etc that aren't in use.
     }
-
+    
     // MARK: - ARSCNViewDelegate
     
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
+    /*
+     // Override to create and configure nodes for anchors added to the view's session.
+     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
+     let node = SCNNode()
      
-        return node
-    }
-*/
+     return node
+     }
+     */
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
@@ -185,6 +268,23 @@ class ViewController: UIViewController, ARSCNViewDelegate, CLLocationManagerDele
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
     }
+}
+
+func getOrientationString() -> String{
+    var currentOrientation = ""
+    switch UIDevice.current.orientation{
+    case .portrait:
+        currentOrientation="Portrait"
+    case .portraitUpsideDown:
+        currentOrientation="PortraitUpsideDown"
+    case .landscapeLeft:
+        currentOrientation="LandscapeLeft"
+    case .landscapeRight:
+        currentOrientation="LandscapeRight"
+    default:
+        currentOrientation = "Other"
+    }
+    return currentOrientation
 }
 
 //An extension to rotate the snapshot in case of portrait orientation
@@ -212,4 +312,74 @@ extension UIImage {
         let resultImage = UIImage(cgImage: rotatedImage)
         return resultImage
     }
+}
+
+//Extension to get the current timestamp for naming the files
+extension Date {
+    var ticks: String {
+        return String(format: "%d",UInt64((self.timeIntervalSince1970 + 62_135_596_800) * 10_000_000))
+    }
+}
+
+func getDataFromUrl(url: URL, completion: @escaping (_ data: Data?, _  response: URLResponse?, _ error: Error?) -> Void) {
+    URLSession.shared.dataTask(with: url) {
+        (data, response, error) in
+        completion(data, response, error)
+        }.resume()
+}
+//
+//
+//extension UIImageView {
+//    func downloadedFrom(url: URL, contentMode mode: UIViewContentMode = .scaleAspectFit) {
+//        contentMode = mode
+//        URLSession.shared.dataTask(with: url) { (data, response, error) in
+//            guard
+//                let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
+//                let mimeType = response?.mimeType, mimeType.hasPrefix("image"),
+//                let data = data, error == nil,
+//                let image = UIImage(data: data)
+//                else { return }
+//            DispatchQueue.main.async() { () -> Void in
+//                self.image = image
+//            }
+//            }.resume()
+//    }
+//    func downloadedFrom(link: String, contentMode mode: UIViewContentMode = .scaleAspectFit) {
+//        guard let url = URL(string: link) else { return }
+//        downloadedFrom(url: url, contentMode: mode)
+//    }
+//}
+
+func haversineDinstance(la1: Double, lo1: Double, la2: Double, lo2: Double, radius: Double = 6367444.7) -> Double {
+    
+    let haversin = { (angle: Double) -> Double in
+        return (1 - cos(angle))/2
+    }
+    
+    let ahaversin = { (angle: Double) -> Double in
+        return 2*asin(sqrt(angle))
+    }
+    
+    // Converts from degrees to radians
+    let dToR = { (angle: Double) -> Double in
+        return (angle / 360) * 2 * M_PI
+    }
+    
+    let lat1 = dToR(la1)
+    let lon1 = dToR(lo1)
+    let lat2 = dToR(la2)
+    let lon2 = dToR(lo2)
+    
+    return radius * ahaversin(haversin(lat2 - lat1) + cos(lat1) * cos(lat2) * haversin(lon2 - lon1))
+}
+
+func angleFromCoordinate(lat1: Double, long1: Double, lat2: Double, long2: Double) -> (Double){
+    let dLon = (long2 - long1);
+    let y = sin(dLon) * cos(lat2);
+    let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon);
+    var brng = atan2(y, x);
+    brng = Double((brng + 360).truncatingRemainder(dividingBy: 360));
+    brng = 360 - brng; // count degrees counter-clockwise - remove to make clockwise
+    
+    return brng;
 }

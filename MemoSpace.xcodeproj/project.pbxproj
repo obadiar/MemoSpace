@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6BD08D9A1F6E8A89000DFFEE /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6BD08D991F6E8A89000DFFEE /* GoogleService-Info.plist */; };
 		D43B506B1F6DCC3D00116DAE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43B506A1F6DCC3D00116DAE /* AppDelegate.swift */; };
 		D43B506F1F6DCC3D00116DAE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D43B506E1F6DCC3D00116DAE /* ViewController.swift */; };
 		D43B50721F6DCC3D00116DAE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D43B50701F6DCC3D00116DAE /* Main.storyboard */; };
@@ -20,6 +21,7 @@
 		039FF246AD466BD31DCBFC04 /* Pods_MemoSpace.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MemoSpace.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E9CE80514D2AE53DF07439A /* Pods-MemoSpace.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemoSpace.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace.debug.xcconfig"; sourceTree = "<group>"; };
 		447F37D2AA7261671D816C7A /* Pods-MemoSpace.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MemoSpace.release.xcconfig"; path = "Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace.release.xcconfig"; sourceTree = "<group>"; };
+		6BD08D991F6E8A89000DFFEE /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D43B50671F6DCC3D00116DAE /* MemoSpace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemoSpace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D43B506A1F6DCC3D00116DAE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D43B506E1F6DCC3D00116DAE /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 		D43B50691F6DCC3D00116DAE /* MemoSpace */ = {
 			isa = PBXGroup;
 			children = (
+				6BD08D991F6E8A89000DFFEE /* GoogleService-Info.plist */,
 				D43B506A1F6DCC3D00116DAE /* AppDelegate.swift */,
 				D43B506E1F6DCC3D00116DAE /* ViewController.swift */,
 				D43B50701F6DCC3D00116DAE /* Main.storyboard */,
@@ -155,6 +158,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D43B50771F6DCC3D00116DAE /* LaunchScreen.storyboard in Resources */,
+				6BD08D9A1F6E8A89000DFFEE /* GoogleService-Info.plist in Resources */,
 				D43B50741F6DCC3D00116DAE /* Assets.xcassets in Resources */,
 				D43B50721F6DCC3D00116DAE /* Main.storyboard in Resources */,
 			);
@@ -171,12 +175,20 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-MemoSpace/Pods-MemoSpace-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/SwiftGifOrigin/SwiftGifOrigin.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftGifOrigin.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
